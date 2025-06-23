@@ -1,10 +1,6 @@
 package ru.netology.config;
 
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRegistration;
 
@@ -13,13 +9,18 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 public class WebAppInitializer implements WebApplicationInitializer {
+
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
-        var context = new AnnotationConfigWebApplicationContext();
-        context.setConfigLocation("ru.netology.config");
+        // Создаем контекст Spring
+        AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+        context.register(WebConfig.class); // Регистрируем конфигурационный класс, НЕ setConfigLocation
+        context.refresh();
 
-        var servlet = servletContext.addServlet("dispatcher", new DispatcherServlet(context));
-        servlet.setLoadOnStartup(1);
-        servlet.addMapping("/");
+        // Создаем и настраиваем DispatcherServlet
+        DispatcherServlet dispatcherServlet = new DispatcherServlet(context);
+        ServletRegistration.Dynamic registration = servletContext.addServlet("dispatcher", dispatcherServlet);
+        registration.setLoadOnStartup(1);
+        registration.addMapping("/"); // Обрабатываем все запросы
     }
 }
